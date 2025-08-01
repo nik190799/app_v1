@@ -68,12 +68,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       filled: true,
                       fillColor: Color(0xFFF5F8FE),
                     ),
+                    onSubmitted: (_) {
+                      if (!_loading) _searchWeather();
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
                 SizedBox(
                   height: 54,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade700,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                     onPressed: _loading ? null : _searchWeather,
                     child: _loading
                         ? const SizedBox(
@@ -86,18 +93,31 @@ class _WeatherScreenState extends State<WeatherScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            if (_error != null)
+            if (_loading && _weather == null)
+              const Padding(
+                padding: EdgeInsets.all(28.0),
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+            if (_error != null && !_loading)
               Padding(
                 padding: const EdgeInsets.all(18.0),
-                child: Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red, fontSize: 18),
+                child: Column(
+                  children: [
+                    const Icon(Icons.error, color: Colors.red, size: 44),
+                    const SizedBox(height: 10),
+                    Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.red, fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
-            if (_weather != null)
+            if (_weather != null && !_loading)
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       '${_weather!.city}',
@@ -127,6 +147,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           final f = _weather!.forecast[idx];
                           return Card(
                             margin: const EdgeInsets.only(right: 10),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             child: Container(
                               width: 86,
                               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
@@ -135,7 +157,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 children: [
                                   Text(f.icon, style: const TextStyle(fontSize: 26)),
                                   const SizedBox(height: 5),
-                                  Text('${f.temperature.toStringAsFixed(1)}°C', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  Text('${f.temperature.toStringAsFixed(1)}°C',
+                                      style: const TextStyle(fontWeight: FontWeight.bold)),
                                   const SizedBox(height: 3),
                                   Text(
                                     DateFormat('H:mm').format(f.date),
@@ -149,6 +172,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            if (_weather == null && !_loading && _error == null)
+              const Center(
+                child: Text(
+                  'Enter a city name and tap search to view weather.',
+                  style: TextStyle(fontSize: 17, color: Colors.grey),
+                  textAlign: TextAlign.center,
                 ),
               ),
           ],
